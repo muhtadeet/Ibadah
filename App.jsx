@@ -1,62 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, View, useColorScheme } from "react-native";
+import { Text, View, useColorScheme } from "react-native";
 import axios from "axios";
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 import moment from "moment";
 import {
   PaperProvider,
-  useTheme,
   MD3LightTheme,
   MD3DarkTheme,
+  Appbar,
+  ActivityIndicator,
+  Card,
+  Divider,
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
-
-// const theme = {
-//   ...DefaultTheme,
-//   colors: {
-//     primary: "rgb(150, 73, 0)",
-//     onPrimary: "rgb(255, 255, 255)",
-//     primaryContainer: "rgb(255, 220, 198)",
-//     onPrimaryContainer: "rgb(49, 19, 0)",
-//     secondary: "rgb(117, 88, 70)",
-//     onSecondary: "rgb(255, 255, 255)",
-//     secondaryContainer: "rgb(255, 220, 198)",
-//     onSecondaryContainer: "rgb(43, 23, 8)",
-//     tertiary: "rgb(96, 97, 52)",
-//     onTertiary: "rgb(255, 255, 255)",
-//     tertiaryContainer: "rgb(229, 230, 173)",
-//     onTertiaryContainer: "rgb(28, 29, 0)",
-//     error: "rgb(186, 26, 26)",
-//     onError: "rgb(255, 255, 255)",
-//     errorContainer: "rgb(255, 218, 214)",
-//     onErrorContainer: "rgb(65, 0, 2)",
-//     background: "rgb(255, 251, 255)",
-//     onBackground: "rgb(32, 26, 23)",
-//     surface: "rgb(255, 251, 255)",
-//     onSurface: "rgb(32, 26, 23)",
-//     surfaceVariant: "rgb(244, 222, 211)",
-//     onSurfaceVariant: "rgb(82, 68, 60)",
-//     outline: "rgb(132, 116, 106)",
-//     outlineVariant: "rgb(215, 195, 183)",
-//     shadow: "rgb(0, 0, 0)",
-//     scrim: "rgb(0, 0, 0)",
-//     inverseSurface: "rgb(54, 47, 43)",
-//     inverseOnSurface: "rgb(251, 238, 232)",
-//     inversePrimary: "rgb(255, 183, 134)",
-//     elevation: {
-//       level0: "transparent",
-//       level1: "rgb(250, 242, 242)",
-//       level2: "rgb(247, 237, 235)",
-//       level3: "rgb(244, 231, 227)",
-//       level4: "rgb(242, 230, 224)",
-//       level5: "rgb(240, 226, 219)",
-//     },
-//     surfaceDisabled: "rgba(32, 26, 23, 0.12)",
-//     onSurfaceDisabled: "rgba(32, 26, 23, 0.38)",
-//     backdrop: "rgba(58, 46, 38, 0.4)",
-//   },
-// };
 
 const convTo12 = (time) => {
   const timeObject = moment(time, "HH:mm");
@@ -72,15 +29,14 @@ export default App = () => {
   const [month, setMonth] = useState({});
   const [place, setPlace] = useState({});
 
-  // const theme = useTheme();
   const colorScheme = useColorScheme();
   const { theme } = useMaterial3Theme({ fallbackSourceColor: "#37306B" });
 
   const paperTheme = useMemo(
     () =>
       colorScheme === "dark"
-        ? { ...MD3DarkTheme, colors: theme.dark }
-        : { ...MD3LightTheme, colors: theme.light },
+        ? { ...MD3LightTheme, colors: theme.light }
+        : { ...MD3DarkTheme, colors: theme.dark },
     [colorScheme, theme]
   );
 
@@ -123,156 +79,350 @@ export default App = () => {
     }
   }, [location]);
 
+  if (!location || !date.day) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme[colorScheme].onSecondaryContainer,
+        }}
+      >
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ActivityIndicator
+            size="large"
+            color={theme[colorScheme].tertiaryContainer}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <PaperProvider theme={paperTheme}>
       <View
         style={{
           backgroundColor: theme[colorScheme].onSecondaryContainer,
           flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
         }}
       >
-        {/* <Text style={[styles.title]}>Ibadah</Text> */}
-        {location ? (
-          <Text
+        <Appbar.Header mode="center-aligned" elevated>
+          <Appbar.Content title="Ibadah" />
+        </Appbar.Header>
+
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row-reverse",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            marginTop: 10,
+          }}
+        >
+          {location ? (
+            <Text
+              style={{
+                fontSize: 30,
+                fontWeight: "bold",
+                fontFamily: "",
+                marginTop: 20,
+                marginBottom: 10,
+                marginRight: 20,
+                color: theme[colorScheme].primaryContainer,
+              }}
+            >
+              {location[0].city}
+            </Text>
+          ) : (
+            <Text>No Location</Text>
+          )}
+          <View
             style={{
-              fontSize: 50,
-              fontWeight: "bold",
-              margin: 20,
-              color: theme[colorScheme].primaryContainer,
+              display: "flex",
+              flexDirection: "row",
+              marginTop: 20,
+              marginBottom: 10,
+              marginLeft: 20,
             }}
           >
-            {location[0].city}
-          </Text>
-        ) : (
-          <Text>No Location</Text>
-        )}
-        <View style={{ display: "flex", flexDirection: "row" }}>
+            <Text
+              style={{
+                fontSize: 20,
+                color: theme[colorScheme].tertiaryContainer,
+                fontWeight: "bold",
+              }}
+            >
+              {date.day}th&nbsp;
+            </Text>
+            <Text
+              style={{
+                fontSize: 20,
+                color: theme[colorScheme].tertiaryContainer,
+                fontWeight: "bold",
+              }}
+            >
+              {month.en},&nbsp;
+            </Text>
+            <Text
+              style={{
+                fontSize: 20,
+                color: theme[colorScheme].tertiaryContainer,
+                fontWeight: "bold",
+              }}
+            >
+              {date.year}
+            </Text>
+          </View>
+        </View>
+        <Divider
+          horizontalInset
+          bold
+          style={{
+            marginVertical: 40,
+            paddingVertical: 0.5,
+            borderRadius: 10,
+            opacity: 0.3,
+          }}
+        />
+
+        <Card
+          elevation={1}
+          style={{ paddingHorizontal: 10, marginHorizontal: 20 }}
+        >
+          <Card.Title title="Ramadan Mubarak" titleVariant="headlineSmall" />
+          <Card.Content
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surfaceVariant,
+              }}
+            >
+              Imsak🌙
+              {"\n"}
+              {convTo12(prayerTimes.Imsak)}
+            </Text>
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surfaceVariant,
+              }}
+            >
+              Iftar&nbsp;&nbsp;🤲
+              {"\n"}
+              {convTo12(prayerTimes.Maghrib)}
+            </Text>
+          </Card.Content>
+        </Card>
+        <Divider
+          horizontalInset
+          bold
+          style={{
+            marginVertical: 40,
+            paddingVertical: 0.5,
+            borderRadius: 10,
+            opacity: 0.3,
+          }}
+        />
+        <View
+          style={{
+            marginTop: 0,
+            display: "flex",
+            alignItems: "center",
+            marginBottom: 40,
+          }}
+        >
           <Text
             style={{
-              fontSize: 30,
-              marginTop: 10,
+              fontSize: 35,
+              justifyContent: "center",
+              alignItems: "center",
               color: theme[colorScheme].tertiaryContainer,
-              fontWeight: "bold",
             }}
           >
-            {date.day}th&nbsp;
-          </Text>
-          <Text
-            style={{
-              fontSize: 30,
-              marginTop: 10,
-              color: theme[colorScheme].tertiaryContainer,
-              fontWeight: "bold",
-            }}
-          >
-            {month.en},&nbsp;
-          </Text>
-          <Text
-            style={{
-              fontSize: 30,
-              marginTop: 10,
-              color: theme[colorScheme].tertiaryContainer,
-              fontWeight: "bold",
-            }}
-          >
-            {date.year}
+            Prayer times for today
           </Text>
         </View>
-        <Text
-          style={{
-            fontSize: 30,
-            marginTop: 10,
-            color: theme[colorScheme].surface,
-          }}
-        >
-          Fajr: {convTo12(prayerTimes.Fajr)}
-        </Text>
-        <Text
-          style={{
-            fontSize: 30,
-            marginTop: 10,
-            color: theme[colorScheme].surface,
-          }}
-        >
-          Imsak: {convTo12(prayerTimes.Imsak)}
-        </Text>
-        <Text
-          style={{
-            fontSize: 30,
-            marginTop: 10,
-            color: theme[colorScheme].surface,
-          }}
-        >
-          Sunrise: {convTo12(prayerTimes.Sunrise)}
-        </Text>
-        <Text
-          style={{
-            fontSize: 30,
-            marginTop: 10,
-            color: theme[colorScheme].surface,
-          }}
-        >
-          Dhuhr: {convTo12(prayerTimes.Dhuhr)}
-        </Text>
-        <Text
-          style={{
-            fontSize: 30,
-            marginTop: 10,
-            color: theme[colorScheme].surface,
-          }}
-        >
-          Asr: {convTo12(prayerTimes.Asr)}
-        </Text>
-        <Text
-          style={{
-            fontSize: 30,
-            marginTop: 10,
-            color: theme[colorScheme].surface,
-          }}
-        >
-          Maghrib: {convTo12(prayerTimes.Maghrib)}
-        </Text>
-        <Text
-          style={{
-            fontSize: 30,
-            marginTop: 10,
-            color: theme[colorScheme].surface,
-          }}
-        >
-          Isha: {convTo12(prayerTimes.Isha)}
-        </Text>
-        <StatusBar style="light" />
+        <View>
+          <View
+            style={{
+              paddingHorizontal: 50,
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 30,
+                color: theme[colorScheme].surface,
+                // letterSpacing: 0,
+              }}
+            >
+              🌆&nbsp;&nbsp;&nbsp;&nbsp;Fajr
+            </Text>
+            <Text
+              style={{
+                fontSize: 30,
+                color: theme[colorScheme].surface,
+              }}
+            >
+              {convTo12(prayerTimes.Fajr)}
+            </Text>
+          </View>
+          <View
+            style={{
+              paddingHorizontal: 50,
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+                // letterSpacing: 0,
+              }}
+            >
+              🌄&nbsp;&nbsp;&nbsp;&nbsp;Sunrise
+            </Text>
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+              }}
+            >
+              {convTo12(prayerTimes.Sunrise)}
+            </Text>
+          </View>
+          <View
+            style={{
+              paddingHorizontal: 50,
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+                // letterSpacing: 0,
+              }}
+            >
+              ☀️&nbsp;&nbsp;&nbsp;&nbsp;Dhuhr
+            </Text>
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+              }}
+            >
+              {convTo12(prayerTimes.Dhuhr)}
+            </Text>
+          </View>
+          <View
+            style={{
+              paddingHorizontal: 50,
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+                // letterSpacing: 0,
+              }}
+            >
+              🌥️&nbsp;&nbsp;&nbsp;&nbsp;Asr
+            </Text>
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+              }}
+            >
+              {convTo12(prayerTimes.Asr)}
+            </Text>
+          </View>
+          <View
+            style={{
+              paddingHorizontal: 50,
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+                // letterSpacing: 0,
+              }}
+            >
+              🌅&nbsp;&nbsp;&nbsp;&nbsp;Maghrib
+            </Text>
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+              }}
+            >
+              {convTo12(prayerTimes.Maghrib)}
+            </Text>
+          </View>
+          <View
+            style={{
+              paddingHorizontal: 50,
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              flexDirection: "row",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+                // letterSpacing: 0,
+              }}
+            >
+              🌙&nbsp;&nbsp;&nbsp;&nbsp;Isha
+            </Text>
+            <Text
+              style={{
+                fontSize: 30,
+                marginTop: 10,
+                color: theme[colorScheme].surface,
+              }}
+            >
+              {convTo12(prayerTimes.Isha)}
+            </Text>
+          </View>
+        </View>
+
+        <StatusBar style="dark" />
       </View>
     </PaperProvider>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 50,
-    backgroundColor: "#303A52",
-  },
-  date: {
-    display: "flex",
-    flexDirection: "row",
-  },
-  title: {
-    fontSize: 50,
-    fontWeight: "bold",
-    margin: 20,
-    color: "#FC85AE",
-  },
-  prayerTimes: {
-    marginTop: 20,
-  },
-  prayerTime: {
-    fontSize: 30,
-    marginTop: 10,
-    color: "#fff",
-  },
-});
