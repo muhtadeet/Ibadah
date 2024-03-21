@@ -52,7 +52,7 @@ const App = () => {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <View style={{marginTop: 40}}>
+      <View>
         <Card elevation={1} style={{ marginHorizontal: 20, paddingTop: 15 }}>
           <Card.Title title="Hadith of the Day" titleVariant="headlineMedium" />
           <Card.Content>
