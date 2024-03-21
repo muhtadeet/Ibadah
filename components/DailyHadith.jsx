@@ -11,7 +11,13 @@ import {
   Icon,
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
-import { SafeAreaView, ScrollView, useColorScheme, View } from "react-native";
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  ScrollView,
+  useColorScheme,
+  View,
+} from "react-native";
 
 const useHadithOfTheDay = () => {
   const [hadith, setHadith] = useState(null);
@@ -47,17 +53,45 @@ const App = () => {
   const hadith = useHadithOfTheDay();
 
   if (!hadith) {
-    return <Text>Loading...</Text>;
+    return (
+      <View
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme[colorScheme].onSecondaryContainer,
+        }}
+      >
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ActivityIndicator
+            size="large"
+            color={theme[colorScheme].tertiaryContainer}
+          />
+        </View>
+      </View>
+    );
   }
 
   return (
     <PaperProvider theme={paperTheme}>
       <View>
-        <Card elevation={1} style={{ marginHorizontal: 20, paddingTop: 15 }}>
-          <Card.Title title="Hadith of the Day" titleVariant="headlineMedium" />
+        <Card
+          elevation={1}
+          style={{ marginHorizontal: 20, paddingTop: 15, marginBottom: 30 }}
+        >
+          <Card.Title
+            title="Hadith of the Day"
+            titleVariant="titleLarge"
+            titleStyle={{ color: theme[colorScheme].tertiaryContainer }}
+          />
           <Card.Content>
             <Text
-              variant="titleLarge"
+              variant="titleMedium"
               style={{
                 // fontSize: 30,
                 // marginTop: 10,
@@ -69,7 +103,7 @@ const App = () => {
               {hadith.data.hadith_english}
             </Text>
             <Text
-              variant="titleLarge"
+              variant="titleMedium"
               style={{
                 // fontSize: 30,
                 marginTop: 15,

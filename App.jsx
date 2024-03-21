@@ -6,8 +6,6 @@ import {
   PaperProvider,
   MD3LightTheme,
   MD3DarkTheme,
-  Appbar,
-  Text,
   BottomNavigation,
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
@@ -53,14 +51,6 @@ export default App = () => {
   return (
     <PaperProvider theme={paperTheme}>
       <StatusBar translucent style="auto" />
-
-      <Appbar.Header
-        mode="small"
-        style={{
-          backgroundColor: theme[colorScheme].onSecondaryContainer,
-        }}
-      ></Appbar.Header>
-
       <BottomNavigation
         shifting
         sceneAnimationType="shifting"
