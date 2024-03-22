@@ -53,7 +53,7 @@ export default App = () => {
       <StatusBar translucent style="auto" />
       <BottomNavigation
         shifting
-        sceneAnimationType="shifting"
+        sceneAnimationType="opacity"
         navigationState={{ index, routes }}
         onIndexChange={setIndex}
         renderScene={renderScene}
