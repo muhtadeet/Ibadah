@@ -162,28 +162,37 @@ export default Home = () => {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <Appbar
-        mode="medium"
+      <View
         style={{
           backgroundColor: theme[colorScheme].onSecondaryContainer,
           paddingTop: 35,
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
+          alignItems: "center",
+          paddingVertical: 20,
+          paddingTop: 50,
         }}
       >
-        <Text
-          variant="headlineMedium"
+        <View
           style={{
-            fontWeight: "bold",
-            color: theme[colorScheme].primaryContainer,
-            marginTop: 10,
-            marginHorizontal: 100,
+            display: "flex",
             justifyContent: "center",
+            alignItems: "flex-start",
+            marginHorizontal: 30,
           }}
         >
-          Ibadah
-        </Text>
+          <Text
+            variant="headlineMedium"
+            style={{
+              fontWeight: "bold",
+              color: theme[colorScheme].primaryContainer,
+              marginTop: 10,
+            }}
+          >
+            Ibadah
+          </Text>
+        </View>
         <View
           style={{
             display: "flex",
@@ -259,7 +268,7 @@ export default Home = () => {
             </Text>
           </View>
         </View>
-      </Appbar>
+      </View>
       <SafeAreaView
         style={{
           backgroundColor: theme[colorScheme].onSecondaryContainer,
