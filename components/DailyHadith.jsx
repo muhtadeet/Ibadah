@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import {
   PaperProvider,
@@ -18,23 +18,74 @@ import {
   useColorScheme,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// const useHadithOfTheDay = () => {
+//   const [hadith, setHadith] = useState(null);
+
+//   useEffect(() => {
+//     const getHadithOfTheDay = async () => {
+//       const response = await axios.get(
+//         "https://random-hadith-generator.vercel.app/bukhari/"
+//       );
+//       const data = response.data;
+//       setHadith(data);
+//     };
+
+//     getHadithOfTheDay();
+//   }, []);
+
+//   //   console.log(hadith.data.refno);
+//   return hadith;
+// };
 
 const useHadithOfTheDay = () => {
   const [hadith, setHadith] = useState(null);
+  const [date, setDate] = useState(new Date());
+
+  const getHadithOfTheDay = useCallback(async () => {
+    const itemData = await AsyncStorage.getItem("hadithOfTheDay");
+    if (itemData) {
+      const parsedData = JSON.parse(itemData);
+      const parsedDate = new Date(parsedData.date);
+      if (
+        parsedDate.getDate() === date.getDate() &&
+        parsedDate.getMonth() === date.getMonth() &&
+        parsedDate.getFullYear() === date.getFullYear()
+      ) {
+        setHadith(parsedData);
+      } else {
+        try {
+          const response = await axios.get(
+            "https://random-hadith-generator.vercel.app/bukhari/"
+          );
+          const data = response.data;
+          data.date = date;
+          setHadith(data);
+          await AsyncStorage.setItem("hadithOfTheDay", JSON.stringify(data));
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    } else {
+      try {
+        const response = await axios.get(
+          "https://random-hadith-generator.vercel.app/bukhari/"
+        );
+        const data = response.data;
+        data.date = date;
+        setHadith(data);
+        await AsyncStorage.setItem("hadithOfTheDay", JSON.stringify(data));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  }, [date]);
 
   useEffect(() => {
-    const getHadithOfTheDay = async () => {
-      const response = await axios.get(
-        "https://random-hadith-generator.vercel.app/bukhari/"
-      );
-      const data = response.data;
-      setHadith(data);
-    };
-
     getHadithOfTheDay();
-  }, []);
+  }, [getHadithOfTheDay, date]);
 
-  //   console.log(hadith.data.refno);
   return hadith;
 };
 

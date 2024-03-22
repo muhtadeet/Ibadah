@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   useColorScheme,
@@ -13,7 +13,6 @@ import {
   PaperProvider,
   MD3LightTheme,
   MD3DarkTheme,
-  Appbar,
   Card,
   Divider,
   Text,
@@ -21,7 +20,6 @@ import {
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import DailyHadith from "./DailyHadith";
-import dayjs from "dayjs";
 
 const convTo12 = (time) => {
   const timeObject = moment(time, "HH:mm");
@@ -97,17 +95,22 @@ export default Home = () => {
   );
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        setErrorMsg("Permission to access location was denied");
-        return;
+    const requestPermission = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          setErrorMsg("No Location Permissions");
+          return;
+        }
+        const location = await Location.getCurrentPositionAsync({});
+        const address = await Location.reverseGeocodeAsync(location.coords);
+        setLocation(address);
+      } catch (e) {
+        console.warn(`Error on requestPermission: ${e}`);
       }
+    };
 
-      const location = await Location.getCurrentPositionAsync({});
-      const address = await Location.reverseGeocodeAsync(location.coords);
-      setLocation(address);
-    })();
+    requestPermission();
   }, []);
 
   // if (location) {
@@ -115,25 +118,51 @@ export default Home = () => {
   //   console.log(location[0]);
   // }
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   if (location) {
+  //     const params = {
+  //       address: location[0].region,
+  //     };
+
+  //     axios
+  //       .get(`https://api.aladhan.com/v1/timingsByAddress`, { params })
+  //       .then((response) => {
+  //         if (response.data.data) {
+  //           setPrayerTimes(response.data.data.timings);
+  //           setDate(response.data.data.date.hijri);
+  //           setMonth(response.data.data.date.hijri.month);
+  //         }
+  //       })
+  //       .catch((error) => console.error(error));
+  //   }
+  // }, [location]);
+
+  const getPrayerTimes = useCallback(async () => {
     if (location) {
       const params = {
         address: location[0].region,
       };
 
-      axios
-        .get(`https://api.aladhan.com/v1/timingsByAddress`, { params })
-        .then((response) => {
-          if (response.data.data) {
-            setPrayerTimes(response.data.data.timings);
-            setDate(response.data.data.date.hijri);
-            setMonth(response.data.data.date.hijri.month);
-            setPlace(response.data.data.meta);
-          }
-        })
-        .catch((error) => console.error(error));
+      try {
+        const response = await axios.get(
+          `https://api.aladhan.com/v1/timingsByAddress`,
+          { params }
+        );
+
+        if (response.data.data) {
+          setPrayerTimes(response.data.data.timings);
+          setDate(response.data.data.date.hijri);
+          setMonth(response.data.data.date.hijri.month);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
   }, [location]);
+
+  useEffect(() => {
+    getPrayerTimes();
+  }, [getPrayerTimes]);
 
   if (!location || !date.day) {
     return (
