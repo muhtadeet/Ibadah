@@ -20,6 +20,7 @@ import {
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import DailyHadith from "./DailyHadith";
+import CountDown from "react-native-countdown-fixed";
 
 const convTo12 = (time) => {
   const timeObject = moment(time, "HH:mm");
@@ -181,7 +182,7 @@ export default Home = () => {
           }}
         >
           <ActivityIndicator
-            size="large"
+            size="17rge"
             color={theme[colorScheme].tertiaryContainer}
           />
         </View>
@@ -247,7 +248,7 @@ export default Home = () => {
             >
               <Icon
                 source="bullseye-arrow"
-                size={15}
+                size={17}
                 color={theme[colorScheme].primaryContainer}
               />
               &nbsp;&nbsp;
@@ -319,7 +320,7 @@ export default Home = () => {
               }}
             >
               <Text variant="titleMedium">Time for</Text>
-              {now < IshaOrQiyam && now > MagribOrIsha ? (
+              {now < IshaOrQiyam || now > MagribOrIsha ? (
                 <>
                   <Text
                     variant="displayMedium"
@@ -330,6 +331,26 @@ export default Home = () => {
                   <Text variant="titleMedium">
                     Next up is Qiyam at {convTo12(prayerTimes.Midnight)}
                   </Text>
+                  <Text
+                    variant="titleLarge"
+                    style={{ color: theme[colorScheme].primaryContainer }}
+                  >
+                    After
+                  </Text>
+                  <CountDown
+                    until={86400 - now + IshaOrQiyam}
+                    size={17}
+                    onFinish={() => alert("Isha")}
+                    digitStyle={{ backgroundColor: "transparent", margin: -15 }}
+                    digitTxtStyle={{
+                      color: theme[colorScheme].tertiaryContainer,
+                    }}
+                    timeLabelStyle={{
+                      color: theme[colorScheme].primaryContainer,
+                    }}
+                    timeToShow={["H", "M", "S"]}
+                    timeLabels={{ h: "Hours", m: "Mins", s: "Secs" }}
+                  />
                 </>
               ) : now > IshaOrQiyam && now < QiyamOrFajr ? (
                 <>
@@ -342,6 +363,26 @@ export default Home = () => {
                   <Text variant="titleMedium">
                     Next up is Fajr at {convTo12(prayerTimes.Fajr)}
                   </Text>
+                  <Text
+                    variant="titleLarge"
+                    style={{ color: theme[colorScheme].primaryContainer }}
+                  >
+                    After
+                  </Text>
+                  <CountDown
+                    until={QiyamOrFajr - now}
+                    size={17}
+                    onFinish={() => alert("Isha")}
+                    digitStyle={{ backgroundColor: "transparent", margin: -15 }}
+                    digitTxtStyle={{
+                      color: theme[colorScheme].tertiaryContainer,
+                    }}
+                    timeLabelStyle={{
+                      color: theme[colorScheme].primaryContainer,
+                    }}
+                    timeToShow={["H", "M", "S"]}
+                    timeLabels={{ h: "Hours", m: "Mins", s: "Secs" }}
+                  />
                 </>
               ) : now > QiyamOrFajr && now < FajrOrDhuhr ? (
                 <>
@@ -354,6 +395,26 @@ export default Home = () => {
                   <Text variant="titleMedium">
                     Next up is Dhuhr at {convTo12(prayerTimes.Dhuhr)}
                   </Text>
+                  <Text
+                    variant="titleLarge"
+                    style={{ color: theme[colorScheme].primaryContainer }}
+                  >
+                    After
+                  </Text>
+                  <CountDown
+                    until={FajrOrDhuhr - now}
+                    size={17}
+                    onFinish={() => alert("Isha")}
+                    digitStyle={{ backgroundColor: "transparent", margin: -15 }}
+                    digitTxtStyle={{
+                      color: theme[colorScheme].tertiaryContainer,
+                    }}
+                    timeLabelStyle={{
+                      color: theme[colorScheme].primaryContainer,
+                    }}
+                    timeToShow={["H", "M", "S"]}
+                    timeLabels={{ h: "Hours", m: "Mins", s: "Secs" }}
+                  />
                 </>
               ) : now > FajrOrDhuhr && now < DhuhrOrAsr ? (
                 <>
@@ -366,6 +427,26 @@ export default Home = () => {
                   <Text variant="titleMedium">
                     Next up is Asr at {convTo12(prayerTimes.Asr)}
                   </Text>
+                  <Text
+                    variant="titleLarge"
+                    style={{ color: theme[colorScheme].primaryContainer }}
+                  >
+                    After
+                  </Text>
+                  <CountDown
+                    until={DhuhrOrAsr - now}
+                    size={17}
+                    onFinish={() => alert("Isha")}
+                    digitStyle={{ backgroundColor: "transparent", margin: -15 }}
+                    digitTxtStyle={{
+                      color: theme[colorScheme].tertiaryContainer,
+                    }}
+                    timeLabelStyle={{
+                      color: theme[colorScheme].primaryContainer,
+                    }}
+                    timeToShow={["H", "M", "S"]}
+                    timeLabels={{ h: "Hours", m: "Mins", s: "Secs" }}
+                  />
                 </>
               ) : now > DhuhrOrAsr && now < AsrOrMaghrib ? (
                 <>
@@ -378,6 +459,26 @@ export default Home = () => {
                   <Text variant="titleMedium">
                     Next up is Maghrib at {convTo12(prayerTimes.Maghrib)}
                   </Text>
+                  <Text
+                    variant="titleLarge"
+                    style={{ color: theme[colorScheme].primaryContainer }}
+                  >
+                    After
+                  </Text>
+                  <CountDown
+                    until={AsrOrMaghrib - now}
+                    size={17}
+                    onFinish={() => alert("Isha")}
+                    digitStyle={{ backgroundColor: "transparent", margin: -15 }}
+                    digitTxtStyle={{
+                      color: theme[colorScheme].tertiaryContainer,
+                    }}
+                    timeLabelStyle={{
+                      color: theme[colorScheme].primaryContainer,
+                    }}
+                    timeToShow={["H", "M", "S"]}
+                    timeLabels={{ h: "Hours", m: "Mins", s: "Secs" }}
+                  />
                 </>
               ) : now > AsrOrMaghrib && now < MagribOrIsha ? (
                 <>
@@ -390,6 +491,26 @@ export default Home = () => {
                   <Text variant="titleMedium">
                     Next up is Isha at {convTo12(prayerTimes.Isha)}
                   </Text>
+                  <Text
+                    variant="titleLarge"
+                    style={{ color: theme[colorScheme].primaryContainer }}
+                  >
+                    After
+                  </Text>
+                  <CountDown
+                    until={MagribOrIsha - now}
+                    size={17}
+                    onFinish={() => alert("Isha")}
+                    digitStyle={{ backgroundColor: "transparent", margin: -15 }}
+                    digitTxtStyle={{
+                      color: theme[colorScheme].tertiaryContainer,
+                    }}
+                    timeLabelStyle={{
+                      color: theme[colorScheme].primaryContainer,
+                    }}
+                    timeToShow={["H", "M", "S"]}
+                    timeLabels={{ h: "Hours", m: "Mins", s: "Secs" }}
+                  />
                 </>
               ) : (
                 <Text variant="titleMedium">Invalid data</Text>

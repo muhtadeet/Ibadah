@@ -20,7 +20,6 @@ import {
   Icon,
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
-import DailyHadith from "./DailyHadith";
 
 const convTo12 = (time) => {
   const timeObject = moment(time, "HH:mm");
@@ -228,7 +227,7 @@ export default Home = () => {
               }}
             >
               <Text variant="titleMedium">Time for</Text>
-              {now < IshaOrQiyam && now > MagribOrIsha ? (
+              {now < IshaOrQiyam || now > MagribOrIsha ? (
                 <>
                   <Text
                     variant="displayMedium"

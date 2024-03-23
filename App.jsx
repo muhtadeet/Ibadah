@@ -11,8 +11,9 @@ import {
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import Home from "./components/Home";
 import SalahTimes from "./components/SalahTimes";
+import Quran from "./components/Quran";
 
-export default App = () => {
+const App = () => {
   const colorScheme = useColorScheme();
   const { theme } = useMaterial3Theme({ fallbackSourceColor: "#37306B" });
 
@@ -21,15 +22,21 @@ export default App = () => {
     {
       key: "home",
       title: "Home",
-      focusedIcon: "home-variant",
-      unfocusedIcon: "home-variant-outline",
+      focusedIcon: "home",
+      unfocusedIcon: "home-outline",
     },
     {
       key: "times",
       title: "Salah Times",
-      focusedIcon: "clock",
-      unfocusedIcon: "clock-outline",
+      focusedIcon: "timer-sand",
+      unfocusedIcon: "timer-sand-empty",
     },
+    // {
+    //   key: "quran",
+    //   title: "Quran",
+    //   focusedIcon: "book-open-page-variant",
+    //   unfocusedIcon: "book-open-variant",
+    // },
   ]);
 
   const paperTheme = useMemo(
@@ -42,10 +49,12 @@ export default App = () => {
 
   const HomeRoute = () => <Home />;
   const PrayerRoute = () => <SalahTimes />;
+  // const QuranRoute = () => <Quran />;
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     times: PrayerRoute,
+    // quran: QuranRoute,
   });
 
   return (
@@ -61,3 +70,5 @@ export default App = () => {
     </PaperProvider>
   );
 };
+
+export default App;
