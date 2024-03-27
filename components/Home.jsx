@@ -146,7 +146,7 @@ export default Home = () => {
 
       try {
         const response = await axios.get(
-          `https://api.aladhan.com/v1/timingsByAddress`,
+          `https://api.aladhan.com/v1/timingsByAddress?adjustment=-1`,
           { params }
         );
 
