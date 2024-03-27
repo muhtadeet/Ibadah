@@ -37,6 +37,12 @@ const App = () => {
       focusedIcon: "book-open-page-variant",
       unfocusedIcon: "book-open-variant",
     },
+    {
+      key: "hadith",
+      title: "Hadith",
+      focusedIcon: "book-open-page-variant",
+      unfocusedIcon: "book-open-variant",
+    },
   ]);
 
   const paperTheme = useMemo(
@@ -50,11 +56,13 @@ const App = () => {
   const HomeRoute = () => <Home />;
   const PrayerRoute = () => <SalahTimes />;
   const QuranRoute = () => <Quran />;
+  const HadithRoute = () => <Hadith />;
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     times: PrayerRoute,
     quran: QuranRoute,
+    hadith: HadithRoute,
   });
 
   return (
