@@ -227,7 +227,7 @@ export default Home = () => {
               }}
             >
               <Text variant="titleMedium">Time for</Text>
-              {now < IshaOrQiyam || now > MagribOrIsha ? (
+              {now < IshaOrQiyam && now > MagribOrIsha ? (
                 <>
                   <Text
                     variant="displayMedium"
