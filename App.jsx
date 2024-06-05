@@ -31,18 +31,18 @@ const App = () => {
       focusedIcon: "timer-sand",
       unfocusedIcon: "timer-sand-empty",
     },
-    // {
-    //   key: "quran",
-    //   title: "Quran",
-    //   focusedIcon: "book-open-page-variant",
-    //   unfocusedIcon: "book-open-variant",
-    // },
-    // {
-    //   key: "hadith",
-    //   title: "Hadith",
-    //   focusedIcon: "book-open-page-variant",
-    //   unfocusedIcon: "book-open-variant",
-    // },
+    {
+      key: "quran",
+      title: "Quran",
+      focusedIcon: "book-open-page-variant",
+      unfocusedIcon: "book-open-variant",
+    },
+    {
+      key: "hadith",
+      title: "Hadith",
+      focusedIcon: "book-open-page-variant",
+      unfocusedIcon: "book-open-variant",
+    },
   ]);
 
   const paperTheme = useMemo(
@@ -55,14 +55,14 @@ const App = () => {
 
   const HomeRoute = () => <Home />;
   const PrayerRoute = () => <SalahTimes />;
-  // const QuranRoute = () => <Quran />;
-  // const HadithRoute = () => <Hadith />;
+  const QuranRoute = () => <Quran />;
+  const HadithRoute = () => <Hadith />;
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     times: PrayerRoute,
-    // quran: QuranRoute,
-    // hadith: HadithRoute,
+    quran: QuranRoute,
+    hadith: HadithRoute,
   });
 
   return (
