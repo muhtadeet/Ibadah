@@ -88,7 +88,7 @@ export default Home = () => {
   //   console.log("Qiyam");
   // }
 
-  console.log(MagribOrIsha);
+  // console.log(MagribOrIsha);
 
   const paperTheme = useMemo(
     () =>
