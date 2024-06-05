@@ -148,7 +148,7 @@ export default Home = () => {
 
       try {
         const response = await axios.get(
-          `https://api.aladhan.com/v1/timingsByAddress`,
+          `https://api.aladhan.com/v1/timingsByAddress?adjustment=-1`,
           { params }
         );
 
@@ -322,7 +322,7 @@ export default Home = () => {
               }}
             >
               <Text variant="titleMedium">Time for</Text>
-              {now < IshaOrQiyam || now > MagribOrIsha ? (
+              {now < IshaOrQiyam && now > MagribOrIsha ? (
                 <>
                   <Text
                     variant="displayMedium"
