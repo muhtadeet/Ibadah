@@ -40,12 +40,11 @@ export default Home = () => {
   const { theme } = useMaterial3Theme({ fallbackSourceColor: "#37306B" });
 
   const time = new Date();
-  // console.log(time)
   // console.log(parseInt(prayerTimes.Fajr));
   const now = time.getHours() * 3600 + time.getMinutes() * 60;
   // console.log(now);
+
   // const Fajr = prayerTimes.Fajr;
-  // console.log(MagribOrIsha);
   let IshaOrQiyam;
   if (prayerTimes.Midnight !== undefined) {
     const time2 = prayerTimes.Midnight.split(":");
@@ -57,7 +56,7 @@ export default Home = () => {
     const time2 = prayerTimes.Fajr.split(":");
     QiyamOrFajr = Number(time2[0]) * 3600 + Number(time2[1]) * 60;
   }
-  
+
   let FajrOrDhuhr;
   if (prayerTimes.Dhuhr !== undefined) {
     const time2 = prayerTimes.Dhuhr.split(":");
@@ -88,8 +87,11 @@ export default Home = () => {
   //   console.log("Qiyam");
   // }
 
+<<<<<<< HEAD
   // console.log(MagribOrIsha);
 
+=======
+>>>>>>> parent of fb63650 (bug fixes)
   const paperTheme = useMemo(
     () =>
       colorScheme === "dark"
@@ -323,7 +325,7 @@ export default Home = () => {
               }}
             >
               <Text variant="titleMedium">Time for</Text>
-              {now < IshaOrQiyam && now > MagribOrIsha ? (
+              {now < IshaOrQiyam || now > MagribOrIsha ? (
                 <>
                   <Text
                     variant="displayMedium"
