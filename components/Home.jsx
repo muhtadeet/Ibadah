@@ -87,11 +87,8 @@ export default Home = () => {
   //   console.log("Qiyam");
   // }
 
-<<<<<<< HEAD
   // console.log(MagribOrIsha);
 
-=======
->>>>>>> parent of fb63650 (bug fixes)
   const paperTheme = useMemo(
     () =>
       colorScheme === "dark"
