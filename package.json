@@ -16,10 +16,10 @@
     "@types/react": "~18.2.79",
     "axios": "^1.6.8",
     "dayjs": "^1.11.10",
-    "expo": "~51.0.9",
+    "expo": "^51.0.10",
     "expo-blur": "~13.0.2",
     "expo-location": "~17.0.1",
-    "expo-notifications": "~0.28.5",
+    "expo-notifications": "~0.28.7",
     "expo-permissions": "^14.4.0",
     "expo-status-bar": "~1.12.1",
     "lucide-react": "^0.359.0",
@@ -39,7 +39,8 @@
     "tailwind-react-native-classnames": "^1.5.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "metro-config": "^0.80.9"
   },
   "private": true
 }
