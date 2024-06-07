@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "Ibadah",
+    "scheme": "com.muhtadee.ibadah",
     "slug": "Ibadah",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -38,11 +39,6 @@
           "locationAlwaysAndWhenInUsePermission": "Allow Ibadah to use your location."
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "69dcf792-6405-44a2-b26e-537c116ba04b"
-      }
-    }
+    ]
   }
 }
