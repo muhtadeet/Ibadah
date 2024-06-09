@@ -32,12 +32,12 @@ const App = () => {
       focusedIcon: "timer-sand",
       unfocusedIcon: "timer-sand-empty",
     },
-    {
-      key: "settings",
-      title: "Settings",
-      focusedIcon: "wrench",
-      unfocusedIcon: "wrench-outline",
-    },
+    // {
+    //   key: "settings",
+    //   title: "Settings",
+    //   focusedIcon: "wrench",
+    //   unfocusedIcon: "wrench-outline",
+    // },
     // {
     //   key: "quran",
     //   title: "Quran",
@@ -62,14 +62,14 @@ const App = () => {
 
   const HomeRoute = () => <Home />;
   const PrayerRoute = () => <SalahTimes />;
-  const SettingsRoute = () => <Settings />;
+  // const SettingsRoute = () => <Settings />;
   // const QuranRoute = () => <Quran />;
   // const HadithRoute = () => <Hadith />;
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     times: PrayerRoute,
-    settings: SettingsRoute,
+    // settings: SettingsRoute,
     // quran: QuranRoute,
     // hadith: HadithRoute,
   });
