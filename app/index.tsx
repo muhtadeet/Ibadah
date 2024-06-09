@@ -11,6 +11,7 @@ import {
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import Home from "../components/Home";
 import SalahTimes from "../components/SalahTimes";
+import Settings from "../components/Settings";
 import Quran from "../components/Quran";
 
 const App = () => {
@@ -31,6 +32,12 @@ const App = () => {
       focusedIcon: "timer-sand",
       unfocusedIcon: "timer-sand-empty",
     },
+    {
+      key: "settings",
+      title: "Settings",
+      focusedIcon: "wrench",
+      unfocusedIcon: "wrench-outline",
+    },
     // {
     //   key: "quran",
     //   title: "Quran",
@@ -47,27 +54,29 @@ const App = () => {
 
   const paperTheme = useMemo(
     () =>
-      colorScheme === "dark"
-        ? { ...MD3LightTheme, colors: theme.light }
-        : { ...MD3DarkTheme, colors: theme.dark },
+      colorScheme === "light"
+        ? { ...MD3LightTheme, colors: theme.dark }
+        : { ...MD3DarkTheme, colors: theme.light },
     [colorScheme, theme]
   );
 
   const HomeRoute = () => <Home />;
   const PrayerRoute = () => <SalahTimes />;
+  const SettingsRoute = () => <Settings />;
   // const QuranRoute = () => <Quran />;
   // const HadithRoute = () => <Hadith />;
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     times: PrayerRoute,
+    settings: SettingsRoute,
     // quran: QuranRoute,
     // hadith: HadithRoute,
   });
 
   return (
     <PaperProvider theme={paperTheme}>
-      <StatusBar translucent style="auto" />
+      <StatusBar translucent style="inverted" />
       <BottomNavigation
         shifting
         sceneAnimationType="opacity"

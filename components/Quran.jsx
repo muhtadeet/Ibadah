@@ -24,9 +24,9 @@ const Quran = () => {
   const { theme } = useMaterial3Theme({ fallbackSourceColor: "#37306B" });
   const paperTheme = useMemo(
     () =>
-      colorScheme === "dark"
-        ? { ...MD3LightTheme, colors: theme.light }
-        : { ...MD3DarkTheme, colors: theme.dark },
+      colorScheme === "light"
+        ? { ...MD3LightTheme, colors: theme.dark }
+        : { ...MD3DarkTheme, colors: theme.light },
     [colorScheme, theme]
   );
   const [quran, setQuran] = useState();

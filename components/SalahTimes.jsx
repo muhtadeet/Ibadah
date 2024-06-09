@@ -82,9 +82,9 @@ export default Home = () => {
 
   const paperTheme = useMemo(
     () =>
-      colorScheme === "dark"
-        ? { ...MD3LightTheme, colors: theme.light }
-        : { ...MD3DarkTheme, colors: theme.dark },
+      colorScheme === "light"
+        ? { ...MD3LightTheme, colors: theme.dark }
+        : { ...MD3DarkTheme, colors: theme.light },
     [colorScheme, theme]
   );
 
