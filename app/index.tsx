@@ -13,6 +13,7 @@ import Home from "../components/Home";
 import SalahTimes from "../components/SalahTimes";
 import Settings from "../components/Settings";
 import Quran from "../components/Quran";
+import { NavigationContainer } from "@react-navigation/native";
 
 const App = () => {
   const colorScheme = useColorScheme();
@@ -63,7 +64,11 @@ const App = () => {
   const HomeRoute = () => <Home />;
   const PrayerRoute = () => <SalahTimes />;
   // const SettingsRoute = () => <Settings />;
-  // const QuranRoute = () => <Quran />;
+  // const QuranRoute = () => (
+  //   // <NavigationContainer independent={true}>
+  //   <Quran />
+  //   // </NavigationContainer>
+  // );
   // const HadithRoute = () => <Hadith />;
 
   const renderScene = BottomNavigation.SceneMap({
@@ -76,7 +81,7 @@ const App = () => {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <StatusBar translucent style="inverted" />
+      <StatusBar animated style="auto" />
       <BottomNavigation
         shifting
         sceneAnimationType="opacity"

@@ -20,71 +20,47 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// const useHadithOfTheDay = () => {
-//   const [hadith, setHadith] = useState(null);
-
-//   useEffect(() => {
-//     const getHadithOfTheDay = async () => {
-//       const response = await axios.get(
-//         "https://random-hadith-generator.vercel.app/bukhari/"
-//       );
-//       const data = response.data;
-//       setHadith(data);
-//     };
-
-//     getHadithOfTheDay();
-//   }, []);
-
-//   //   console.log(hadith.data.refno);
-//   return hadith;
-// };
-
 const useHadithOfTheDay = () => {
   const [hadith, setHadith] = useState(null);
-  const [date, setDate] = useState(new Date());
 
   const getHadithOfTheDay = useCallback(async () => {
-    const itemData = await AsyncStorage.getItem("hadithOfTheDay");
-    if (itemData) {
-      const parsedData = JSON.parse(itemData);
-      const parsedDate = new Date(parsedData.date);
-      if (
-        parsedDate.getDate() === date.getDate() &&
-        parsedDate.getMonth() === date.getMonth() &&
-        parsedDate.getFullYear() === date.getFullYear()
-      ) {
-        setHadith(parsedData);
-      } else {
-        try {
-          const response = await axios.get(
-            "https://random-hadith-generator.vercel.app/bukhari/"
-          );
-          const data = response.data;
-          data.date = date;
-          setHadith(data);
-          await AsyncStorage.setItem("hadithOfTheDay", JSON.stringify(data));
-        } catch (error) {
-          console.error(error);
+    const today = new Date().toDateString();
+    const cacheKey = 'hadithOfTheDay';
+    const lastFetchDateKey = 'lastFetchDateHadith';
+
+    try {
+      // Check when we last fetched the data
+      const lastFetchDate = await AsyncStorage.getItem(lastFetchDateKey);
+
+      // If we've already fetched today, use the cached data
+      if (lastFetchDate === today) {
+        const cachedData = await AsyncStorage.getItem(cacheKey);
+        if (cachedData) {
+          setHadith(JSON.parse(cachedData));
+          return;
         }
       }
-    } else {
-      try {
-        const response = await axios.get(
-          "https://random-hadith-generator.vercel.app/bukhari/"
-        );
-        const data = response.data;
-        data.date = date;
-        setHadith(data);
-        await AsyncStorage.setItem("hadithOfTheDay", JSON.stringify(data));
-      } catch (error) {
-        console.error(error);
-      }
+
+      // If we haven't fetched today, make API call
+      const response = await axios.get(
+        "https://random-hadith-generator.vercel.app/bukhari/"
+      );
+      const data = response.data;
+
+      // Cache the data
+      await AsyncStorage.setItem(cacheKey, JSON.stringify(data));
+      // Update the last fetch date
+      await AsyncStorage.setItem(lastFetchDateKey, today);
+
+      setHadith(data);
+    } catch (error) {
+      console.error("Error fetching hadith:", error);
     }
-  }, [date]);
+  }, []);
 
   useEffect(() => {
     getHadithOfTheDay();
-  }, [getHadithOfTheDay, date]);
+  }, [getHadithOfTheDay]);
 
   return hadith;
 };
@@ -107,23 +83,16 @@ const App = () => {
     return (
       <View
         style={{
-          display: "flex",
+          flex: 1,
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: theme[colorScheme].onSecondaryContainer,
         }}
       >
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <ActivityIndicator
-            size="large"
-            color={theme[colorScheme].tertiaryContainer}
-          />
-        </View>
+        <ActivityIndicator
+          size="large"
+          color={theme[colorScheme].tertiaryContainer}
+        />
       </View>
     );
   }
@@ -144,8 +113,6 @@ const App = () => {
             <Text
               variant="titleMedium"
               style={{
-                // fontSize: 30,
-                // marginTop: 10,
                 color: theme[colorScheme].surfaceVariant,
               }}
             >
@@ -156,7 +123,6 @@ const App = () => {
             <Text
               variant="titleMedium"
               style={{
-                // fontSize: 30,
                 marginTop: 15,
                 paddingBottom: 10,
                 color: theme[colorScheme].surfaceVariant,

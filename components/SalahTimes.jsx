@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   ScrollView,
+  AppState,
 } from "react-native";
 import axios from "axios";
 import * as Location from "expo-location";
@@ -20,6 +21,7 @@ import {
   Icon,
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const convTo12 = (time) => {
   const timeObject = moment(time, "HH:mm");
@@ -134,17 +136,46 @@ export default Home = () => {
 
   const getPrayerTimes = useCallback(async () => {
     if (location) {
-      const params = {
-        address: location[0].region,
-      };
+      const today = new Date().toDateString();
+      const cacheKey = `prayerTimes_${location[0].region}`;
+      const lastFetchDateKey = `lastFetchDate_${location[0].region}`;
 
       try {
+        // Check when we last fetched the data
+        const lastFetchDate = await AsyncStorage.getItem(lastFetchDateKey);
+
+        // If we've already fetched today, use the cached data
+        if (lastFetchDate === today) {
+          const cachedData = await AsyncStorage.getItem(cacheKey);
+          if (cachedData) {
+            const parsedData = JSON.parse(cachedData);
+            setPrayerTimes(parsedData.timings);
+            setDate(parsedData.date.hijri);
+            setMonth(parsedData.date.hijri.month);
+            return;
+          }
+        }
+
+        // If we haven't fetched today, make API call
+        const params = {
+          address: location[0].region,
+        };
+
         const response = await axios.get(
           `https://api.aladhan.com/v1/timingsByAddress?adjustment=-1`,
           { params }
         );
 
         if (response.data.data) {
+          const dataToCache = {
+            timings: response.data.data.timings,
+            date: response.data.data.date,
+          };
+          // Cache the data
+          await AsyncStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+          // Update the last fetch date
+          await AsyncStorage.setItem(lastFetchDateKey, today);
+
           setPrayerTimes(response.data.data.timings);
           setDate(response.data.data.date.hijri);
           setMonth(response.data.data.date.hijri.month);
@@ -154,6 +185,18 @@ export default Home = () => {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        getPrayerTimes();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [getPrayerTimes]);
 
   useEffect(() => {
     getPrayerTimes();
