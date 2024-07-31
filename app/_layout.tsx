@@ -54,7 +54,7 @@ export default function AppLayout() {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <StatusBar barStyle={"light-content"} />
+      <StatusBar barStyle={"default"} />
       <BottomNavigation
         navigationState={{ index: getActiveIndex(), routes }}
         onIndexChange={(index) =>
