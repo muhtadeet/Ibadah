@@ -22,10 +22,68 @@ import {
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as BackgroundFetch from "expo-background-fetch";
+import * as TaskManager from "expo-task-manager";
+
+const BACKGROUND_FETCH_TASK = "background-fetch-task";
 
 const convTo12 = (time) => {
   const timeObject = moment(time, "HH:mm");
   return timeObject.format("h:mm A");
+};
+
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const now = new Date();
+  if (now.getHours() === 0 && now.getMinutes() === 0) {
+    try {
+      await getPrayerTimes();
+      return BackgroundFetch.BackgroundFetchResult.NewData;
+    } catch (error) {
+      console.error("Failed to fetch prayer times in background", error);
+      return BackgroundFetch.BackgroundFetchResult.Failed;
+    }
+  } else {
+    return BackgroundFetch.BackgroundFetchResult.NoData;
+  }
+});
+
+const getPrayerTimes = async () => {
+  const now = new Date();
+  const location = await Location.getCurrentPositionAsync({});
+  const address = await Location.reverseGeocodeAsync(location.coords);
+
+  if (address && address[0]) {
+    const today = now.toDateString();
+    const cacheKey = `prayerTimes_${address[0].region}`;
+    const lastFetchDateKey = `lastFetchDate_${address[0].region}`;
+
+    try {
+      const params = {
+        address: address[0].region,
+      };
+
+      const response = await axios.get(
+        `https://api.aladhan.com/v1/timingsByAddress?adjustment=0`,
+        { params }
+      );
+
+      if (response.data.data) {
+        const dataToCache = {
+          timings: response.data.data.timings,
+          date: response.data.data.date,
+        };
+        // Cache the data
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+        // Update the last fetch date
+        await AsyncStorage.setItem(lastFetchDateKey, today);
+
+        return dataToCache;
+      }
+    } catch (error) {
+      console.error("Error fetching prayer times:", error);
+    }
+  }
+  return null;
 };
 
 export default Home = () => {
@@ -134,54 +192,36 @@ export default Home = () => {
   //   }
   // }, [location]);
 
-  const getPrayerTimes = useCallback(async () => {
+  const loadPrayerTimes = useCallback(async () => {
     if (location) {
-      const today = new Date().toDateString();
+      const now = new Date();
+      const today = now.toDateString();
       const cacheKey = `prayerTimes_${location[0].region}`;
       const lastFetchDateKey = `lastFetchDate_${location[0].region}`;
 
       try {
-        // Check when we last fetched the data
         const lastFetchDate = await AsyncStorage.getItem(lastFetchDateKey);
+        const cachedData = await AsyncStorage.getItem(cacheKey);
 
-        // If we've already fetched today, use the cached data
-        if (lastFetchDate === today) {
-          const cachedData = await AsyncStorage.getItem(cacheKey);
-          if (cachedData) {
-            const parsedData = JSON.parse(cachedData);
-            setPrayerTimes(parsedData.timings);
-            setDate(parsedData.date.hijri);
-            setMonth(parsedData.date.hijri.month);
-            return;
+        if (lastFetchDate !== today || !cachedData) {
+          // If it's a new day or there's no cached data, fetch new data
+          const newData = await getPrayerTimes();
+          if (newData) {
+            setPrayerTimes(newData.timings);
+            setDate(newData.date.hijri);
+            setMonth(newData.date.hijri.month);
+          } else {
+            console.log("Failed to fetch prayer times data.");
           }
-        }
-
-        // If we haven't fetched today, make API call
-        const params = {
-          address: location[0].region,
-        };
-
-        const response = await axios.get(
-          `https://api.aladhan.com/v1/timingsByAddress?adjustment=-1`,
-          { params }
-        );
-
-        if (response.data.data) {
-          const dataToCache = {
-            timings: response.data.data.timings,
-            date: response.data.data.date,
-          };
-          // Cache the data
-          await AsyncStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-          // Update the last fetch date
-          await AsyncStorage.setItem(lastFetchDateKey, today);
-
-          setPrayerTimes(response.data.data.timings);
-          setDate(response.data.data.date.hijri);
-          setMonth(response.data.data.date.hijri.month);
+        } else if (cachedData) {
+          // Use cached data
+          const parsedData = JSON.parse(cachedData);
+          setPrayerTimes(parsedData.timings);
+          setDate(parsedData.date.hijri);
+          setMonth(parsedData.date.hijri.month);
         }
       } catch (error) {
-        console.error(error);
+        console.error("Error loading prayer times:", error);
       }
     }
   }, [location]);
@@ -189,18 +229,18 @@ export default Home = () => {
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState === "active") {
-        getPrayerTimes();
+        loadPrayerTimes();
       }
     });
 
     return () => {
       subscription.remove();
     };
-  }, [getPrayerTimes]);
+  }, [loadPrayerTimes]);
 
   useEffect(() => {
-    getPrayerTimes();
-  }, [getPrayerTimes]);
+    loadPrayerTimes();
+  }, [loadPrayerTimes]);
 
   if (!location || !date.day) {
     return (

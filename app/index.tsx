@@ -81,7 +81,6 @@ const App = () => {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <StatusBar animated style="auto" />
       <BottomNavigation
         shifting
         sceneAnimationType="opacity"

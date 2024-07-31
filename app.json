@@ -38,6 +38,13 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Ibadah to use your location."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./local/path/to/your/notification-icon.png",
+          "color": "#ffffff"
+        }
       ]
     ],
     "extra": {

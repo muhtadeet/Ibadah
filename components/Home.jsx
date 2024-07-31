@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   SafeAreaView,
   ScrollView,
+  AppState,
 } from "react-native";
 import axios from "axios";
 import * as Location from "expo-location";
@@ -22,12 +23,120 @@ import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import DailyHadith from "./DailyHadith";
 import CountDown from "react-native-countdown-fixed";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AppState } from "react-native";
+import * as BackgroundFetch from "expo-background-fetch";
+import * as TaskManager from "expo-task-manager";
+import * as Notifications from "expo-notifications";
+
+const BACKGROUND_FETCH_TASK = "background-fetch-task";
 
 const convTo12 = (time) => {
   const timeObject = moment(time, "HH:mm");
   return timeObject.format("h:mm A");
 };
+
+const setUpNotifications = async () => {
+  await Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+};
+
+const scheduleNotifications = async (prayerTimes) => {
+  await Notifications.cancelAllScheduledNotificationsAsync();
+
+  const scheduleTimes = [
+    { name: "Fajr", time: prayerTimes.Fajr },
+    { name: "Sunrise", time: prayerTimes.Sunrise },
+    { name: "Dhuhr", time: prayerTimes.Dhuhr },
+    { name: "Asr", time: prayerTimes.Asr },
+    { name: "Maghrib", time: prayerTimes.Maghrib },
+    { name: "Isha", time: prayerTimes.Isha },
+    { name: "Qiyam", time: prayerTimes.Midnight },
+    { name: "Sunset", time: prayerTimes.Sunset },
+  ];
+
+  for (const { name, time } of scheduleTimes) {
+    const [hours, minutes] = time.split(":").map(Number);
+    const scheduledTime = new Date();
+    scheduledTime.setHours(hours, minutes, 0, 0);
+
+    if (scheduledTime <= new Date()) {
+      scheduledTime.setDate(scheduledTime.getDate() + 1);
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `Time for ${name}`,
+        body: `It's ${time}. Time for ${name}`,
+      },
+      trigger: {
+        hour: hours,
+        minute: minutes,
+        repeats: true,
+      },
+    });
+  }
+};
+
+const getPrayerTimes = async () => {
+  const now = new Date();
+  const location = await Location.getCurrentPositionAsync({});
+  const address = await Location.reverseGeocodeAsync(location.coords);
+
+  if (address && address[0]) {
+    const today = now.toDateString();
+    const cacheKey = `prayerTimes_${address[0].region}`;
+    const lastFetchDateKey = `lastFetchDate_${address[0].region}`;
+
+    try {
+      const params = {
+        address: address[0].region,
+      };
+
+      const response = await axios.get(
+        `https://api.aladhan.com/v1/timingsByAddress?adjustment=0`,
+        { params }
+      );
+
+      if (response.data.data) {
+        const dataToCache = {
+          timings: response.data.data.timings,
+          date: response.data.data.date,
+        };
+        // Cache the data
+        await AsyncStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+        // Update the last fetch date
+        await AsyncStorage.setItem(lastFetchDateKey, today);
+
+        // Schedule notifications for the new prayer times
+        await scheduleNotifications(response.data.data.timings);
+
+        return dataToCache;
+      }
+    } catch (error) {
+      console.error("Error fetching prayer times:", error);
+    }
+  }
+  return null;
+};
+
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const now = new Date();
+  if (now.getHours() === 0 && now.getMinutes() === 0) {
+    try {
+      await getPrayerTimes();
+      return BackgroundFetch.BackgroundFetchResult.NewData;
+    } catch (error) {
+      console.error("Failed to fetch prayer times in background", error);
+      return BackgroundFetch.BackgroundFetchResult.Failed;
+    }
+  } else {
+    return BackgroundFetch.BackgroundFetchResult.NoData;
+  }
+});
 
 export default Home = () => {
   const [location, setLocation] = useState(null);
@@ -36,60 +145,49 @@ export default Home = () => {
   const [prayerTimes, setPrayerTimes] = useState({});
   const [date, setDate] = useState({});
   const [month, setMonth] = useState({});
-  const [place, setPlace] = useState({});
 
   const colorScheme = useColorScheme();
   const { theme } = useMaterial3Theme({ fallbackSourceColor: "#37306B" });
 
   const time = new Date();
-  // console.log(parseInt(prayerTimes.Fajr));
   const now = time.getHours() * 3600 + time.getMinutes() * 60;
-  // console.log(now);
 
-  // const Fajr = prayerTimes.Fajr;
-  let IshaOrQiyam;
-  if (prayerTimes.Midnight !== undefined) {
+  let IshaOrQiyam,
+    QiyamOrFajr,
+    FajrOrDhuhr,
+    DhuhrOrAsr,
+    AsrOrMaghrib,
+    MagribOrIsha;
+
+  if (prayerTimes.Midnight) {
     const time2 = prayerTimes.Midnight.split(":");
     IshaOrQiyam = Number(time2[0]) * 3600 + Number(time2[1]) * 60;
   }
 
-  let QiyamOrFajr;
-  if (prayerTimes.Fajr !== undefined) {
+  if (prayerTimes.Fajr) {
     const time2 = prayerTimes.Fajr.split(":");
     QiyamOrFajr = Number(time2[0]) * 3600 + Number(time2[1]) * 60;
   }
 
-  let FajrOrDhuhr;
-  if (prayerTimes.Dhuhr !== undefined) {
+  if (prayerTimes.Dhuhr) {
     const time2 = prayerTimes.Dhuhr.split(":");
     FajrOrDhuhr = Number(time2[0]) * 3600 + Number(time2[1]) * 60;
   }
 
-  let DhuhrOrAsr;
-  if (prayerTimes.Asr !== undefined) {
+  if (prayerTimes.Asr) {
     const time2 = prayerTimes.Asr.split(":");
     DhuhrOrAsr = Number(time2[0]) * 3600 + Number(time2[1]) * 60;
   }
 
-  let AsrOrMaghrib;
-  if (prayerTimes.Maghrib !== undefined) {
+  if (prayerTimes.Maghrib) {
     const time2 = prayerTimes.Maghrib.split(":");
     AsrOrMaghrib = Number(time2[0]) * 3600 + Number(time2[1]) * 60;
   }
 
-  let MagribOrIsha;
-  if (prayerTimes.Isha !== undefined) {
+  if (prayerTimes.Isha) {
     const time2 = prayerTimes.Isha.split(":");
     MagribOrIsha = Number(time2[0]) * 3600 + Number(time2[1]) * 60;
   }
-
-  // if (now < seconds) {
-  //   console.log("Fajr");
-  // } else {
-  //   console.log("Qiyam");
-  // }
-
-  // console.log(MagribOrIsha);
 
   const paperTheme = useMemo(
     () =>
@@ -98,6 +196,26 @@ export default Home = () => {
         : { ...MD3DarkTheme, colors: theme.light },
     [colorScheme, theme]
   );
+
+  useEffect(() => {
+    const requestNotificationPermissions = async () => {
+      const { status } = await Notifications.requestPermissionsAsync({
+        ios: {
+          allowAlert: true,
+          allowBadge: true,
+          allowSound: true,
+          allowAnnouncements: true,
+        },
+      });
+      if (status !== "granted") {
+        alert(
+          "You need to enable notifications to receive prayer time alerts."
+        );
+      }
+    };
+
+    requestNotificationPermissions();
+  }, []);
 
   useEffect(() => {
     const requestPermission = async () => {
@@ -118,78 +236,39 @@ export default Home = () => {
     requestPermission();
   }, []);
 
-  // if (location) {
-  //   city = location[0].city;
-  //   console.log(location[0]);
-  // }
+  useEffect(() => {
+    setUpNotifications();
+  }, []);
 
-  // useEffect(() => {
-  //   if (location) {
-  //     const params = {
-  //       address: location[0].region,
-  //     };
-
-  //     axios
-  //       .get(`https://api.aladhan.com/v1/timingsByAddress`, { params })
-  //       .then((response) => {
-  //         if (response.data.data) {
-  //           setPrayerTimes(response.data.data.timings);
-  //           setDate(response.data.data.date.hijri);
-  //           setMonth(response.data.data.date.hijri.month);
-  //         }
-  //       })
-  //       .catch((error) => console.error(error));
-  //   }
-  // }, [location]);
-
-  const getPrayerTimes = useCallback(async () => {
+  const loadPrayerTimes = useCallback(async () => {
     if (location) {
-      const today = new Date().toDateString();
       const cacheKey = `prayerTimes_${location[0].region}`;
-      const lastFetchDateKey = `lastFetchDate_${location[0].region}`;
-
       try {
-        // Check when we last fetched the data
-        const lastFetchDate = await AsyncStorage.getItem(lastFetchDateKey);
+        const cachedData = await AsyncStorage.getItem(cacheKey);
+        if (cachedData) {
+          const parsedData = JSON.parse(cachedData);
+          setPrayerTimes(parsedData.timings);
+          setDate(parsedData.date.hijri);
+          setMonth(parsedData.date.hijri.month);
 
-        // If we've already fetched today, use the cached data
-        if (lastFetchDate === today) {
-          const cachedData = await AsyncStorage.getItem(cacheKey);
-          if (cachedData) {
-            const parsedData = JSON.parse(cachedData);
-            setPrayerTimes(parsedData.timings);
-            setDate(parsedData.date.hijri);
-            setMonth(parsedData.date.hijri.month);
-            return;
+          // Schedule notifications for the cached prayer times
+          await scheduleNotifications(parsedData.timings);
+        } else {
+          // If no cached data, trigger getPrayerTimes
+          const newData = await getPrayerTimes();
+          if (newData) {
+            setPrayerTimes(newData.timings);
+            setDate(newData.date.hijri);
+            setMonth(newData.date.hijri.month);
+
+            // Schedule notifications for the new prayer times
+            await scheduleNotifications(newData.timings);
+          } else {
+            console.log("Failed to fetch prayer times data.");
           }
         }
-
-        // If we haven't fetched today, make API call
-        const params = {
-          address: location[0].region,
-        };
-
-        const response = await axios.get(
-          `https://api.aladhan.com/v1/timingsByAddress?adjustment=0`,
-          { params }
-        );
-
-        if (response.data.data) {
-          const dataToCache = {
-            timings: response.data.data.timings,
-            date: response.data.data.date,
-          };
-          // Cache the data
-          await AsyncStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-          // Update the last fetch date
-          await AsyncStorage.setItem(lastFetchDateKey, today);
-
-          setPrayerTimes(response.data.data.timings);
-          setDate(response.data.data.date.hijri);
-          setMonth(response.data.data.date.hijri.month);
-        }
       } catch (error) {
-        console.error(error);
+        console.error("Error loading prayer times:", error);
       }
     }
   }, [location]);
@@ -197,18 +276,38 @@ export default Home = () => {
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState === "active") {
-        getPrayerTimes();
+        loadPrayerTimes();
       }
     });
 
     return () => {
       subscription.remove();
     };
-  }, [getPrayerTimes]);
+  }, [loadPrayerTimes]);
 
   useEffect(() => {
-    getPrayerTimes();
-  }, [getPrayerTimes]);
+    loadPrayerTimes();
+  }, [loadPrayerTimes]);
+
+  useEffect(() => {
+    const registerBackgroundFetch = async () => {
+      try {
+        await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+          minimumInterval: 60 * 60, // 1 hour
+          stopOnTerminate: false,
+          startOnBoot: true,
+        });
+      } catch (err) {
+        console.error("Failed to register background fetch task", err);
+      }
+    };
+
+    registerBackgroundFetch();
+
+    return () => {
+      BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+    };
+  }, []);
 
   if (!location || !date.day) {
     return (
@@ -220,17 +319,10 @@ export default Home = () => {
           backgroundColor: theme[colorScheme].onSecondaryContainer,
         }}
       >
-        <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <ActivityIndicator
-            size="17rge"
-            color={theme[colorScheme].tertiaryContainer}
-          />
-        </View>
+        <ActivityIndicator
+          size="large"
+          color={theme[colorScheme].tertiaryContainer}
+        />
       </View>
     );
   }
