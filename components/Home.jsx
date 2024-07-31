@@ -18,6 +18,7 @@ import {
   Divider,
   Text,
   Icon,
+  Button,
 } from "react-native-paper";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import DailyHadith from "./DailyHadith";
@@ -26,6 +27,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as TaskManager from "expo-task-manager";
 import * as Notifications from "expo-notifications";
+import { useRouter } from "expo-router";
 
 const BACKGROUND_FETCH_TASK = "background-fetch-task";
 
@@ -71,6 +73,7 @@ const scheduleNotifications = async (prayerTimes) => {
       content: {
         title: `Time for ${name}`,
         body: `It's ${time}. Time for ${name}`,
+        data: { screen: 'salah-times' }
       },
       trigger: {
         hour: hours,
@@ -80,6 +83,19 @@ const scheduleNotifications = async (prayerTimes) => {
     });
   }
 };
+
+// const scheduleTestNotification = async () => {
+//   await Notifications.scheduleNotificationAsync({
+//     content: {
+//       title: "Test Notification",
+//       body: "Tap this notification to open the app",
+//       data: { screen: "salah-times" },
+//     },
+//     trigger: {
+//       seconds: 1, // This will trigger the notification after 5 seconds
+//     },
+//   });
+// };
 
 const getPrayerTimes = async () => {
   const now = new Date();
@@ -238,6 +254,21 @@ export default Home = () => {
 
   useEffect(() => {
     setUpNotifications();
+  }, []);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const screenToOpen = response.notification.request.content.data.screen;
+        if (screenToOpen === "salah-times") {
+          router.push("/salah-times");
+        }
+      }
+    );
+
+    return () => subscription.remove();
   }, []);
 
   const loadPrayerTimes = useCallback(async () => {
@@ -436,6 +467,13 @@ export default Home = () => {
           </View>
         </View>
       </View>
+      {/* <Button
+        onPress={scheduleTestNotification}              //to test notifications
+        mode="contained"
+        style={{ margin: 20 }}
+      >
+        Test Notification
+      </Button> */}
       <SafeAreaView
         style={{
           backgroundColor: theme[colorScheme].onSecondaryContainer,

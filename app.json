@@ -44,7 +44,8 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#ffffff"
+          "color": "#ffffff",
+          "androidMode": "default"
         }
       ],
       "expo-router"
