@@ -4,6 +4,7 @@
     "scheme": "com.muhtadee.ibadah",
     "slug": "Ibadah",
     "version": "1.0.0",
+    
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -42,10 +43,11 @@
       [
         "expo-notifications",
         {
-          "icon": "./local/path/to/your/notification-icon.png",
+          "icon": "./assets/notification-icon.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      "expo-router"
     ],
     "extra": {
       "eas": {
