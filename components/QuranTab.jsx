@@ -118,7 +118,7 @@ const QuranTab = ({ navigation }) => {
           }}
         />
       </Appbar.Header>
-      <SafeAreaView
+      <View
         style={{
           backgroundColor: theme[colorScheme].onSecondaryContainer,
           flex: 1,
@@ -135,7 +135,7 @@ const QuranTab = ({ navigation }) => {
           }}
         />
         {/* </ScrollView> */}
-      </SafeAreaView>
+      </View>
     </PaperProvider>
   );
 };

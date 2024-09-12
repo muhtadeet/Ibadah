@@ -72,7 +72,8 @@ export default function AppLayout() {
         }
         renderScene={renderScene}
         shifting={true}
-        sceneAnimationType="shifting"
+        sceneAnimationType="opacity"
+        labeled={false}
       />
     </PaperProvider>
   );
