@@ -10,6 +10,7 @@ import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
 import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "expo-router";
 import SalahTimes from "@/components/SalahTimes";
+import Quran from "@/components/Quran";
 
 export default function AppLayout() {
   const colorScheme = useColorScheme();
@@ -38,11 +39,18 @@ export default function AppLayout() {
       focusedIcon: "timer-sand",
       unfocusedIcon: "timer-sand-empty",
     },
+    {
+      key: "quran",
+      title: "Quran",
+      focusedIcon: "book-open-page-variant-outline",
+      unfocusedIcon: "book",
+    },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
     index: () => <Slot />,
     "salah-times": SalahTimes,
+    "quran": Quran,
   });
 
   const getActiveIndex = () => {
@@ -54,7 +62,7 @@ export default function AppLayout() {
 
   return (
     <PaperProvider theme={paperTheme}>
-      <StatusBar barStyle={"default"} />
+      <StatusBar barStyle={"light-content"} />
       <BottomNavigation
         navigationState={{ index: getActiveIndex(), routes }}
         onIndexChange={(index) =>
@@ -64,7 +72,7 @@ export default function AppLayout() {
         }
         renderScene={renderScene}
         shifting={true}
-        sceneAnimationType="opacity"
+        sceneAnimationType="shifting"
       />
     </PaperProvider>
   );

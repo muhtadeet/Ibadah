@@ -73,7 +73,7 @@ const scheduleNotifications = async (prayerTimes) => {
       content: {
         title: `Time for ${name}`,
         body: `It's ${time}. Time for ${name}`,
-        data: { screen: 'salah-times' }
+        data: { screen: "Home" },
       },
       trigger: {
         hour: hours,
@@ -262,14 +262,14 @@ export default Home = () => {
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         const screenToOpen = response.notification.request.content.data.screen;
-        if (screenToOpen === "salah-times") {
-          router.push("/salah-times");
+        if (screenToOpen === "Home") {
+          router.push("/");
         }
       }
     );
-
+  
     return () => subscription.remove();
-  }, []);
+  }, [router]);
 
   const loadPrayerTimes = useCallback(async () => {
     if (location) {
@@ -718,6 +718,22 @@ export default Home = () => {
                     color: theme[colorScheme].tertiaryContainer,
                   }}
                 >
+                  Sunrise
+                </Text>
+                <Text
+                  variant="titleLarge"
+                  style={{
+                    color: theme[colorScheme].surfaceVariant,
+                  }}
+                >
+                  {convTo12(prayerTimes.Sunrise)}
+                </Text>
+                {/* <Text
+                  variant="titleMedium"
+                  style={{
+                    color: theme[colorScheme].tertiaryContainer,
+                  }}
+                >
                   Imsak
                 </Text>
                 <Text
@@ -727,7 +743,7 @@ export default Home = () => {
                   }}
                 >
                   {convTo12(prayerTimes.Imsak)}
-                </Text>
+                </Text> */}
               </View>
               <View
                 style={{
@@ -752,6 +768,22 @@ export default Home = () => {
                     color: theme[colorScheme].tertiaryContainer,
                   }}
                 >
+                  Sunset
+                </Text>
+                <Text
+                  variant="titleLarge"
+                  style={{
+                    color: theme[colorScheme].surfaceVariant,
+                  }}
+                >
+                  {convTo12(prayerTimes.Sunset)}
+                </Text>
+                {/* <Text
+                  variant="titleMedium"
+                  style={{
+                    color: theme[colorScheme].tertiaryContainer,
+                  }}
+                >
                   Iftar
                 </Text>
                 <Text
@@ -761,7 +793,7 @@ export default Home = () => {
                   }}
                 >
                   {convTo12(prayerTimes.Maghrib)}
-                </Text>
+                </Text> */}
               </View>
             </Card.Content>
           </Card>
