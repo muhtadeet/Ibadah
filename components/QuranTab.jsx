@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   FlatList,
-  TouchableOpacity,
   Pressable,
   useColorScheme,
 } from "react-native";
@@ -14,30 +13,60 @@ import {
   MD3LightTheme,
   MD3DarkTheme,
   Appbar,
+  Button,
 } from "react-native-paper";
 import axios from "axios";
 import { useMaterial3Theme } from "@pchmn/expo-material3-theme";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView } from "react-native-gesture-handler";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const CACHE_KEY = '@QuranSurahs';
 
 const QuranTab = ({ navigation }) => {
   const [surahs, setSurahs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const colorScheme = useColorScheme();
   const { theme } = useMaterial3Theme({ fallbackSourceColor: "#37306B" });
 
   useEffect(() => {
-    fetchSurahs();
+    loadSurahs();
   }, []);
+
+  const loadSurahs = async () => {
+    try {
+      // Try to load data from cache
+      const cachedData = await AsyncStorage.getItem(CACHE_KEY);
+      if (cachedData) {
+        console.log("Loading surahs from cache");
+        setSurahs(JSON.parse(cachedData));
+        setLoading(false);
+      } else {
+        // If no cached data, fetch from API
+        await fetchSurahs();
+      }
+    } catch (error) {
+      console.error("Error loading surahs:", error);
+      setError(error.message || "An error occurred while loading surahs");
+      setLoading(false);
+    }
+  };
 
   const fetchSurahs = async () => {
     try {
+      console.log("Fetching surahs from API...");
       const response = await axios.get("http://api.alquran.cloud/v1/surah");
-      setSurahs(response.data.data);
+      const fetchedSurahs = response.data.data;
+      console.log("Surahs fetched successfully:", fetchedSurahs.length);
+      
+      // Cache the fetched data
+      await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(fetchedSurahs));
+      
+      setSurahs(fetchedSurahs);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching surahs:", error);
+      setError(error.message || "An error occurred while fetching surahs");
       setLoading(false);
     }
   };
@@ -95,6 +124,26 @@ const QuranTab = ({ navigation }) => {
     );
   }
 
+  if (error) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: theme[colorScheme].onSecondaryContainer,
+        }}
+      >
+        <Text style={{ color: theme[colorScheme].error, marginBottom: 20 }}>
+          {error}
+        </Text>
+        <Button mode="contained" onPress={loadSurahs}>
+          Retry
+        </Button>
+      </View>
+    );
+  }
+
   return (
     <PaperProvider theme={paperTheme}>
       <Appbar.Header
@@ -124,7 +173,6 @@ const QuranTab = ({ navigation }) => {
           flex: 1,
         }}
       >
-        {/* <ScrollView> */}
         <FlatList
           data={surahs}
           renderItem={renderSurahItem}
@@ -134,7 +182,6 @@ const QuranTab = ({ navigation }) => {
             marginTop: 10,
           }}
         />
-        {/* </ScrollView> */}
       </View>
     </PaperProvider>
   );
